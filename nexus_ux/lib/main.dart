@@ -423,7 +423,7 @@ class NexusApp extends StatelessWidget {
         final themeColors = NexusTheme.themes[provider.selectedTheme]!;
         
         return MaterialApp(
-          title: 'MyAI Data Hub',
+          title: 'MyAI - Personal AGI with Privacy',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             brightness: provider.selectedTheme == 'dark' ? Brightness.dark : Brightness.light,
@@ -541,13 +541,26 @@ class _NexusDashboardState extends State<NexusDashboard>
                 size: 28,
               ),
               const SizedBox(width: 12),
-              Text(
-                'MyAI',
-                style: TextStyle(
-                  color: themeColors['text'],
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'MyAI',
+                    style: TextStyle(
+                      color: themeColors['text'],
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Personal AGI with Privacy',
+                    style: TextStyle(
+                      color: themeColors['textSecondary'],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
               const Spacer(),
               _buildPrivacyShield(provider, themeColors),
@@ -674,38 +687,112 @@ class _NexusDashboardState extends State<NexusDashboard>
   Widget _buildCosmicDashboard(NexusDataProvider provider, Map<String, Color> themeColors) {
     return Stack(
       children: [
-        // Central sun
-        Center(
-          child: AnimatedBuilder(
-            animation: _pulseController,
-            builder: (context, child) {
-              return Container(
-                width: 80 + _pulseController.value * 20,
-                height: 80 + _pulseController.value * 20,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      themeColors['primary']!,
-                      themeColors['primary']!.withOpacity(0.3),
-                      Colors.transparent,
+        // Welcome message (only show when no search results)
+        if (provider.searchResults.isEmpty && provider.currentQuery.isEmpty)
+          Positioned(
+            top: 20,
+            left: 20,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: themeColors['surface']!.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: themeColors['primary']!.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.psychology,
+                        color: themeColors['primary'],
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Welcome to MyAI',
+                        style: TextStyle(
+                          color: themeColors['text'],
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: themeColors['primary']!.withOpacity(0.5),
-                      blurRadius: 20 + _pulseController.value * 10,
-                      spreadRadius: 5,
+                  const SizedBox(height: 8),
+                  Text(
+                    'Your personal AGI with privacy. Search across all your data instantly - nothing leaves your device.',
+                    style: TextStyle(
+                      color: themeColors['textSecondary'],
+                      fontSize: 14,
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        // Central sun
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  return Container(
+                    width: 80 + _pulseController.value * 20,
+                    height: 80 + _pulseController.value * 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          themeColors['primary']!,
+                          themeColors['primary']!.withOpacity(0.3),
+                          Colors.transparent,
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: themeColors['primary']!.withOpacity(0.5),
+                          blurRadius: 20 + _pulseController.value * 10,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.search,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: themeColors['surface']!.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: themeColors['primary']!.withOpacity(0.3),
+                    width: 1,
+                  ),
                 ),
-                child: Icon(
-                  Icons.search,
-                  color: Colors.white,
-                  size: 40,
+                child: Text(
+                  'Your AI, Your Data',
+                  style: TextStyle(
+                    color: themeColors['text'],
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              );
-            },
+              ),
+            ],
           ),
         ),
         
@@ -727,6 +814,39 @@ class _NexusDashboardState extends State<NexusDashboard>
           bottom: 50,
           left: 20,
           child: _buildConstellationLabel('Kairoz', Colors.purple, themeColors),
+        ),
+        
+        // Privacy message
+        Positioned(
+          bottom: 50,
+          right: 20,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.green.withOpacity(0.5)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.shield,
+                  color: Colors.green,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '100% Private',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
         
         // Add file button

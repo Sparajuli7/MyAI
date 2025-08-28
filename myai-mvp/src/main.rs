@@ -14,7 +14,7 @@ use storage::StorageManager;
 
 #[derive(Parser)]
 #[command(name = "myai-mvp")]
-#[command(about = "Local-first AI data hub with hybrid retrieval")]
+#[command(about = "Personal AGI with privacy - Your local-first AI data hub")]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -74,7 +74,10 @@ fn load_config(config_path: &PathBuf) -> Result<AppConfig> {
 }
 
 async fn run_server(config: AppConfig) -> Result<()> {
-    info!("Starting MyAI MVP server...");
+    info!("Starting MyAI MVP - Your Personal AGI with Privacy...");
+    info!("🔒 Your data stays private - nothing leaves your device");
+    info!("🧠 AI that understands your personal data");
+    info!("⚡ Lightning-fast search across all your files");
     
     // Ensure directories exist
     ensure_directories(&config).await?;

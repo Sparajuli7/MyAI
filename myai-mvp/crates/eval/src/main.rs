@@ -11,7 +11,7 @@ use storage::StorageManager;
 
 #[derive(Parser)]
 #[command(name = "eval")]
-#[command(about = "Evaluation harness for MyAI MVP")]
+#[command(about = "Evaluation harness for MyAI MVP - Personal AGI with Privacy")]
 struct Cli {
     #[arg(short, long)]
     file: PathBuf,
