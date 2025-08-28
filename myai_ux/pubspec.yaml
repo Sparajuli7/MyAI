@@ -1,5 +1,5 @@
-name: nexus_ux
-description: A privacy-first AI data hub with cosmic dashboard design
+name: myai_ux
+description: MyAI - Personal AGI with Privacy. A privacy-first AI data hub with cosmic dashboard design
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -15,6 +15,7 @@ dependencies:
   uuid: ^3.0.6
   speech_to_text: ^6.1.0
   flare_flutter: ^3.0.0
+  url_launcher: ^6.1.14
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,6 @@
-# Nexus AI Data Hub
+# MyAI - Personal AGI with Privacy
 
-A privacy-first AI data hub with a cosmic dashboard design, built with Flutter. Nexus provides a futuristic interface for querying user data across devices with on-device processing.
+A privacy-first AI data hub with a cosmic dashboard design, built with Flutter. MyAI provides a futuristic interface for querying user data across devices with on-device processing - your personal AI assistant that keeps everything private.
 
 ## Features
 
@@ -40,7 +40,7 @@ A privacy-first AI data hub with a cosmic dashboard design, built with Flutter. 
 ### Installation
 1. Navigate to the project directory:
    ```bash
-   cd nexus_ux
+   cd myai_ux
    ```
 
 2. Install dependencies:

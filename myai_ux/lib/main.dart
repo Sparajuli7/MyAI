@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:math' as math;
 import 'dart:async';
 
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => NexusDataProvider(),
-      child: const NexusApp(),
+      create: (context) => MyAIDataProvider(),
+      child: const MyAIApp(),
     ),
   );
 }
@@ -62,9 +61,9 @@ class Orb {
 // STATE MANAGEMENT
 // ============================================================================
 
-class NexusDataProvider extends ChangeNotifier {
+class MyAIDataProvider extends ChangeNotifier {
   List<DataItem> _dataItems = [];
-  List<Orb> _orbs = [];
+  final List<Orb> _orbs = [];
   String _currentQuery = '';
   List<DataItem> _searchResults = [];
   bool _isSearching = false;
@@ -86,7 +85,7 @@ class NexusDataProvider extends ChangeNotifier {
   bool get isVoiceListening => _isVoiceListening;
   bool get speechEnabled => _speechEnabled;
 
-  NexusDataProvider() {
+  MyAIDataProvider() {
     _initializeSpeech();
     _seedFakeData();
     _simulateIndexing();
@@ -380,7 +379,7 @@ class NexusDataProvider extends ChangeNotifier {
 // THEME DATA
 // ============================================================================
 
-class NexusTheme {
+class MyAITheme {
   static const Map<String, Map<String, Color>> themes = {
     'dark': {
       'background': Color(0xFF0A0A0A),
@@ -413,14 +412,14 @@ class NexusTheme {
 // MAIN APP
 // ============================================================================
 
-class NexusApp extends StatelessWidget {
-  const NexusApp({super.key});
+class MyAIApp extends StatelessWidget {
+  const MyAIApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<NexusDataProvider>(
+    return Consumer<MyAIDataProvider>(
       builder: (context, provider, child) {
-        final themeColors = NexusTheme.themes[provider.selectedTheme]!;
+        final themeColors = MyAITheme.themes[provider.selectedTheme]!;
         
         return MaterialApp(
           title: 'MyAI - Personal AGI with Privacy',
@@ -439,7 +438,7 @@ class NexusApp extends StatelessWidget {
               ),
             ),
           ),
-          home: const NexusDashboard(),
+          home: const MyAIDashboard(),
         );
       },
     );
@@ -450,14 +449,14 @@ class NexusApp extends StatelessWidget {
 // COSMIC DASHBOARD
 // ============================================================================
 
-class NexusDashboard extends StatefulWidget {
-  const NexusDashboard({super.key});
+class MyAIDashboard extends StatefulWidget {
+  const MyAIDashboard({super.key});
 
   @override
-  State<NexusDashboard> createState() => _NexusDashboardState();
+  State<MyAIDashboard> createState() => _MyAIDashboardState();
 }
 
-class _NexusDashboardState extends State<NexusDashboard>
+class _MyAIDashboardState extends State<MyAIDashboard>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _orbitController;
@@ -494,9 +493,9 @@ class _NexusDashboardState extends State<NexusDashboard>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<NexusDataProvider>(
+    return Consumer<MyAIDataProvider>(
       builder: (context, provider, child) {
-        final themeColors = NexusTheme.themes[provider.selectedTheme]!;
+        final themeColors = MyAITheme.themes[provider.selectedTheme]!;
         
         return Scaffold(
           body: Container(
@@ -528,7 +527,7 @@ class _NexusDashboardState extends State<NexusDashboard>
     );
   }
 
-  Widget _buildHeader(NexusDataProvider provider, Map<String, Color> themeColors) {
+  Widget _buildHeader(MyAIDataProvider provider, Map<String, Color> themeColors) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -575,7 +574,7 @@ class _NexusDashboardState extends State<NexusDashboard>
     );
   }
 
-  Widget _buildPrivacyShield(NexusDataProvider provider, Map<String, Color> themeColors) {
+  Widget _buildPrivacyShield(MyAIDataProvider provider, Map<String, Color> themeColors) {
     return AnimatedBuilder(
       animation: _shieldController,
       builder: (context, child) {
@@ -595,7 +594,7 @@ class _NexusDashboardState extends State<NexusDashboard>
     );
   }
 
-  Widget _buildThemeSelector(NexusDataProvider provider, Map<String, Color> themeColors) {
+  Widget _buildThemeSelector(MyAIDataProvider provider, Map<String, Color> themeColors) {
     return PopupMenuButton<String>(
       icon: Icon(Icons.palette, color: themeColors['text']),
       onSelected: provider.setTheme,
@@ -607,7 +606,7 @@ class _NexusDashboardState extends State<NexusDashboard>
     );
   }
 
-  Widget _buildQueryBar(NexusDataProvider provider, Map<String, Color> themeColors) {
+  Widget _buildQueryBar(MyAIDataProvider provider, Map<String, Color> themeColors) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -684,7 +683,7 @@ class _NexusDashboardState extends State<NexusDashboard>
     );
   }
 
-  Widget _buildCosmicDashboard(NexusDataProvider provider, Map<String, Color> themeColors) {
+  Widget _buildCosmicDashboard(MyAIDataProvider provider, Map<String, Color> themeColors) {
     return Stack(
       children: [
         // Welcome message (only show when no search results)
@@ -863,7 +862,7 @@ class _NexusDashboardState extends State<NexusDashboard>
     );
   }
 
-  Widget _buildOrb(Orb orb, NexusDataProvider provider, Map<String, Color> themeColors) {
+  Widget _buildOrb(Orb orb, MyAIDataProvider provider, Map<String, Color> themeColors) {
     return AnimatedBuilder(
       animation: _orbitController,
       builder: (context, child) {
@@ -929,41 +928,105 @@ class _NexusDashboardState extends State<NexusDashboard>
     );
   }
 
-  Widget _buildSearchResults(NexusDataProvider provider, Map<String, Color> themeColors) {
+  Widget _buildSearchResults(MyAIDataProvider provider, Map<String, Color> themeColors) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              Icon(
+                Icons.search,
+                color: themeColors['primary'],
+                size: 24,
+              ),
+              const SizedBox(width: 12),
               Text(
                 'Search Results',
                 style: TextStyle(
                   color: themeColors['text'],
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: themeColors['primary']!.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${provider.searchResults.length} found',
+                  style: TextStyle(
+                    color: themeColors['primary'],
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const Spacer(),
-              TextButton(
+              TextButton.icon(
                 onPressed: provider.clearSearch,
-                child: Text(
+                icon: Icon(
+                  Icons.clear,
+                  color: themeColors['textSecondary'],
+                  size: 18,
+                ),
+                label: Text(
                   'Clear',
-                  style: TextStyle(color: themeColors['primary']),
+                  style: TextStyle(
+                    color: themeColors['textSecondary'],
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Expanded(
-            child: ListView.builder(
-              itemCount: provider.searchResults.length,
-              itemBuilder: (context, index) {
-                final item = provider.searchResults[index];
-                return _buildSearchResultItem(item, themeColors);
-              },
-            ),
+            child: provider.searchResults.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          color: themeColors['textSecondary'],
+                          size: 64,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No results found',
+                          style: TextStyle(
+                            color: themeColors['text'],
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Try different keywords or check your spelling',
+                          style: TextStyle(
+                            color: themeColors['textSecondary'],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: provider.searchResults.length,
+                    itemBuilder: (context, index) {
+                      final item = provider.searchResults[index];
+                      return AnimatedOpacity(
+                        opacity: 1.0,
+                        duration: Duration(milliseconds: 300 + (index * 100)),
+                        child: _buildSearchResultItem(item, themeColors),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -971,81 +1034,156 @@ class _NexusDashboardState extends State<NexusDashboard>
   }
 
   Widget _buildSearchResultItem(DataItem item, Map<String, Color> themeColors) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: themeColors['surface'],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _getOrbColor(item.constellation).withOpacity(0.3),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => _showDataDetails(item, themeColors),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: themeColors['surface'],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
               color: _getOrbColor(item.constellation).withOpacity(0.2),
+              width: 1,
             ),
-            child: Icon(
-              _getDataIcon(item.type),
-              color: _getOrbColor(item.constellation),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: TextStyle(
-                    color: themeColors['text'],
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item.content,
-                  style: TextStyle(
-                    color: themeColors['textSecondary'],
-                    fontSize: 14,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${item.type.toUpperCase()} • ${item.constellation} • ${_formatDate(item.createdAt)}',
-                  style: TextStyle(
-                    color: themeColors['textSecondary'],
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (item.relevance > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: themeColors['primary']!.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              child: Text(
-                '${(item.relevance * 100).toInt()}%',
-                style: TextStyle(
-                  color: themeColors['primary'],
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      _getOrbColor(item.constellation),
+                      _getOrbColor(item.constellation).withOpacity(0.7),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _getOrbColor(item.constellation).withOpacity(0.3),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  _getDataIcon(item.type),
+                  color: Colors.white,
+                  size: 24,
                 ),
               ),
-            ),
-        ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.title,
+                            style: TextStyle(
+                              color: themeColors['text'],
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (item.relevance > 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: themeColors['primary']!.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: themeColors['primary']!.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              '${(item.relevance * 100).toInt()}%',
+                              style: TextStyle(
+                                color: themeColors['primary'],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.content,
+                      style: TextStyle(
+                        color: themeColors['textSecondary'],
+                        fontSize: 14,
+                        height: 1.4,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: _getOrbColor(item.constellation).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            item.type.toUpperCase(),
+                            style: TextStyle(
+                              color: _getOrbColor(item.constellation),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: themeColors['textSecondary']!.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            item.constellation,
+                            style: TextStyle(
+                              color: themeColors['textSecondary'],
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          _formatDate(item.createdAt),
+                          style: TextStyle(
+                            color: themeColors['textSecondary'],
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1085,46 +1223,330 @@ class _NexusDashboardState extends State<NexusDashboard>
   void _showDataDetails(DataItem item, Map<String, Color> themeColors) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: themeColors['surface'],
-        title: Text(
-          item.title,
-          style: TextStyle(color: themeColors['text']),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: const BoxConstraints(maxWidth: 600),
+          decoration: BoxDecoration(
+            color: themeColors['surface'],
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 20,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: _getOrbColor(item.constellation).withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            _getOrbColor(item.constellation),
+                            _getOrbColor(item.constellation).withOpacity(0.7),
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _getOrbColor(item.constellation).withOpacity(0.3),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        _getDataIcon(item.type),
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.title,
+                            style: TextStyle(
+                              color: themeColors['text'],
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: _getOrbColor(item.constellation).withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  item.type.toUpperCase(),
+                                  style: TextStyle(
+                                    color: _getOrbColor(item.constellation),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: themeColors['textSecondary']!.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  item.constellation,
+                                  style: TextStyle(
+                                    color: themeColors['textSecondary'],
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(
+                        Icons.close,
+                        color: themeColors['textSecondary'],
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Content
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Content',
+                        style: TextStyle(
+                          color: themeColors['text'],
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: themeColors['background'],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: themeColors['textSecondary']!.withOpacity(0.1),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          item.content,
+                          style: TextStyle(
+                            color: themeColors['textSecondary'],
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // Metadata
+                      Text(
+                        'Details',
+                        style: TextStyle(
+                          color: themeColors['text'],
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: themeColors['background'],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            _buildMetadataRow('Created', _formatDate(item.createdAt), themeColors),
+                            const SizedBox(height: 8),
+                            _buildMetadataRow('Path', item.path, themeColors),
+                            if (item.relevance > 0) ...[
+                              const SizedBox(height: 8),
+                              _buildMetadataRow('Relevance', '${(item.relevance * 100).toInt()}%', themeColors),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              // Actions
+              Container(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        'Close',
+                        style: TextStyle(
+                          color: themeColors['textSecondary'],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await _openFile(item);
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: themeColors['primary'],
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: const Text('Open'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              item.content,
-              style: TextStyle(color: themeColors['textSecondary']),
+      ),
+    );
+  }
+
+  Widget _buildMetadataRow(String label, String value, Map<String, Color> themeColors) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: themeColors['textSecondary'],
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Type: ${item.type}',
-              style: TextStyle(color: themeColors['textSecondary']),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              color: themeColors['text'],
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
-            Text(
-              'Constellation: ${item.constellation}',
-              style: TextStyle(color: themeColors['textSecondary']),
-            ),
-            Text(
-              'Created: ${_formatDate(item.createdAt)}',
-              style: TextStyle(color: themeColors['textSecondary']),
-            ),
-            Text(
-              'Path: ${item.path}',
-              style: TextStyle(color: themeColors['textSecondary']),
-            ),
-          ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openFile(DataItem item) async {
+    try {
+      // Handle different file types
+      if (item.type == 'email') {
+        // For emails, try to open in default email client
+        final emailUri = Uri.parse('mailto:?subject=${Uri.encodeComponent(item.title)}&body=${Uri.encodeComponent(item.content)}');
+        if (await canLaunchUrl(emailUri)) {
+          await launchUrl(emailUri);
+        }
+      } else if (item.type == 'message') {
+        // For messages, try to extract URLs and open them
+        final urlRegex = RegExp(r'https?://[^\s]+');
+        final match = urlRegex.firstMatch(item.content);
+        if (match != null) {
+          final url = Uri.parse(match.group(0)!);
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url, mode: LaunchMode.externalApplication);
+          }
+        } else {
+          // Show content in a dialog if no URL found
+          _showContentDialog(item);
+        }
+      } else {
+        // For files and images, show content in a dialog
+        _showContentDialog(item);
+      }
+    } catch (e) {
+      // Show content in a dialog as fallback
+      _showContentDialog(item);
+    }
+  }
+
+  void _showContentDialog(DataItem item) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(item.title),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Content:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(item.content),
+              const SizedBox(height: 16),
+              Text(
+                'Path:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(item.path),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Close',
-              style: TextStyle(color: themeColors['primary']),
-            ),
+            child: Text('Close'),
           ),
         ],
       ),
