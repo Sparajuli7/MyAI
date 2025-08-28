@@ -113,7 +113,7 @@ class NexusDataProvider extends ChangeNotifier {
       DataItem(
         id: const Uuid().v4(),
         title: 'Budget_2025.xlsx',
-        content: 'Annual budget spreadsheet. Cursor Pro subscription $500, groceries $2000.',
+        content: 'Annual budget spreadsheet. Cursor Pro subscription \$500, groceries \$2000.',
         type: 'file',
         constellation: 'personal',
         createdAt: DateTime(2025, 7, 20),
@@ -276,8 +276,8 @@ class NexusDataProvider extends ChangeNotifier {
       return searchText.contains(queryLower);
     }).toList();
 
-    // Calculate relevance scores
-    for (var item in results) {
+    // Calculate relevance scores and create new items with relevance
+    final resultsWithRelevance = results.map((item) {
       final searchText = '${item.title} ${item.content}'.toLowerCase();
       final queryLower = query.toLowerCase();
       final words = queryLower.split(' ');
@@ -294,7 +294,7 @@ class NexusDataProvider extends ChangeNotifier {
         relevance += 0.3;
       }
       
-      item = DataItem(
+      return DataItem(
         id: item.id,
         title: item.title,
         content: item.content,
@@ -304,12 +304,12 @@ class NexusDataProvider extends ChangeNotifier {
         path: item.path,
         relevance: relevance.clamp(0.0, 1.0),
       );
-    }
+    }).toList();
 
     // Sort by relevance
-    results.sort((a, b) => b.relevance.compareTo(a.relevance));
+    resultsWithRelevance.sort((a, b) => b.relevance.compareTo(a.relevance));
     
-    _searchResults = results;
+    _searchResults = resultsWithRelevance;
     _isSearching = false;
     _isProcessing = false;
     notifyListeners();
@@ -423,7 +423,7 @@ class NexusApp extends StatelessWidget {
         final themeColors = NexusTheme.themes[provider.selectedTheme]!;
         
         return MaterialApp(
-          title: 'Nexus AI Data Hub',
+          title: 'MyAI Data Hub',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             brightness: provider.selectedTheme == 'dark' ? Brightness.dark : Brightness.light,
@@ -542,7 +542,7 @@ class _NexusDashboardState extends State<NexusDashboard>
               ),
               const SizedBox(width: 12),
               Text(
-                'Nexus',
+                'MyAI',
                 style: TextStyle(
                   color: themeColors['text'],
                   fontSize: 28,
@@ -614,44 +614,60 @@ class _NexusDashboardState extends State<NexusDashboard>
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _queryController,
-              style: TextStyle(color: themeColors['text']),
-              decoration: InputDecoration(
-                hintText: 'Search your data...',
-                hintStyle: TextStyle(color: themeColors['textSecondary']),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _queryController,
+                  style: TextStyle(color: themeColors['text']),
+                  decoration: InputDecoration(
+                    hintText: 'Search your data...',
+                    hintStyle: TextStyle(color: themeColors['textSecondary']),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onSubmitted: (query) {
+                    provider.search(query);
+                    _queryController.clear();
+                  },
+                ),
               ),
-              onSubmitted: provider.search,
-            ),
+              if (provider.isProcessing)
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(themeColors['primary']!),
+                  ),
+                )
+              else ...[
+                IconButton(
+                  icon: Icon(
+                    Icons.search,
+                    color: themeColors['primary'],
+                  ),
+                  onPressed: () {
+                    if (_queryController.text.isNotEmpty) {
+                      provider.search(_queryController.text);
+                      _queryController.clear();
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    provider.isVoiceListening ? Icons.mic : Icons.mic_none,
+                    color: provider.isVoiceListening 
+                        ? themeColors['primary']! 
+                        : themeColors['textSecondary'],
+                  ),
+                  onPressed: provider.isVoiceListening 
+                      ? provider.stopVoiceInput 
+                      : provider.startVoiceInput,
+                ),
+              ],
+            ],
           ),
-          if (provider.isProcessing)
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(themeColors['primary']!),
-              ),
-            )
-          else
-            IconButton(
-              icon: Icon(
-                provider.isVoiceListening ? Icons.mic : Icons.mic_none,
-                color: provider.isVoiceListening 
-                    ? themeColors['primary']! 
-                    : themeColors['textSecondary'],
-              ),
-              onPressed: provider.isVoiceListening 
-                  ? provider.stopVoiceInput 
-                  : provider.startVoiceInput,
-            ),
-        ],
-      ),
     );
   }
 
@@ -931,6 +947,19 @@ class _NexusDashboardState extends State<NexusDashboard>
 
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year}';
+  }
+
+  Color _getOrbColor(String constellation) {
+    switch (constellation) {
+      case 'work':
+        return Colors.blue;
+      case 'personal':
+        return Colors.green;
+      case 'kairoz':
+        return Colors.purple;
+      default:
+        return Colors.orange;
+    }
   }
 
   void _showDataDetails(DataItem item, Map<String, Color> themeColors) {
