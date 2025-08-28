@@ -1,0 +1,984 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:uuid/uuid.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'dart:math' as math;
+import 'dart:async';
+
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => NexusDataProvider(),
+      child: const NexusApp(),
+    ),
+  );
+}
+
+// ============================================================================
+// DATA MODELS
+// ============================================================================
+
+class DataItem {
+  final String id;
+  final String title;
+  final String content;
+  final String type; // 'file', 'email', 'message', 'image'
+  final String constellation; // 'work', 'personal', 'kairoz'
+  final DateTime createdAt;
+  final String path;
+  final double relevance; // 0.0 to 1.0 for search relevance
+
+  DataItem({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.type,
+    required this.constellation,
+    required this.createdAt,
+    required this.path,
+    this.relevance = 0.0,
+  });
+}
+
+class Orb {
+  final DataItem data;
+  final Offset position;
+  final double radius;
+  final Color color;
+  final double pulsePhase;
+
+  Orb({
+    required this.data,
+    required this.position,
+    required this.radius,
+    required this.color,
+    this.pulsePhase = 0.0,
+  });
+}
+
+// ============================================================================
+// STATE MANAGEMENT
+// ============================================================================
+
+class NexusDataProvider extends ChangeNotifier {
+  List<DataItem> _dataItems = [];
+  List<Orb> _orbs = [];
+  String _currentQuery = '';
+  List<DataItem> _searchResults = [];
+  bool _isSearching = false;
+  bool _isIndexing = false;
+  bool _isProcessing = false;
+  String _selectedTheme = 'dark';
+  bool _isVoiceListening = false;
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _speechEnabled = false;
+
+  List<DataItem> get dataItems => _dataItems;
+  List<Orb> get orbs => _orbs;
+  String get currentQuery => _currentQuery;
+  List<DataItem> get searchResults => _searchResults;
+  bool get isSearching => _isSearching;
+  bool get isIndexing => _isIndexing;
+  bool get isProcessing => _isProcessing;
+  String get selectedTheme => _selectedTheme;
+  bool get isVoiceListening => _isVoiceListening;
+  bool get speechEnabled => _speechEnabled;
+
+  NexusDataProvider() {
+    _initializeSpeech();
+    _seedFakeData();
+    _simulateIndexing();
+  }
+
+  void _initializeSpeech() async {
+    _speechEnabled = await _speech.initialize();
+    notifyListeners();
+  }
+
+  // Seed fake data on startup
+  void _seedFakeData() {
+    _dataItems = [
+      // Files
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'School_Schedule_2025.pdf',
+        content: 'Son\'s class schedule for 2025 semester. Math at 9 AM, Science at 11 AM.',
+        type: 'file',
+        constellation: 'personal',
+        createdAt: DateTime(2025, 7, 15),
+        path: '~/Documents/School_Schedule_2025.pdf',
+      ),
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'Budget_2025.xlsx',
+        content: 'Annual budget spreadsheet. Cursor Pro subscription $500, groceries $2000.',
+        type: 'file',
+        constellation: 'personal',
+        createdAt: DateTime(2025, 7, 20),
+        path: '~/Documents/Budget_2025.xlsx',
+      ),
+      
+      // Emails
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'Kairoz MVP Meeting',
+        content: 'Demo presentation due November 1st. Need to prepare pitch deck and technical overview.',
+        type: 'email',
+        constellation: 'kairoz',
+        createdAt: DateTime(2025, 8, 10),
+        path: '~/Mail/Kairoz_MVP_Meeting.eml',
+      ),
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'Visa Update',
+        content: 'OPT extension approved until December 2025. Status: Approved. Next steps: biometrics.',
+        type: 'email',
+        constellation: 'personal',
+        createdAt: DateTime(2025, 8, 15),
+        path: '~/Mail/Visa_Update.eml',
+      ),
+      
+      // Messages
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'Send Nexus pitch deck',
+        content: 'Can you send the Nexus pitch deck? Need it for investor meeting tomorrow.',
+        type: 'message',
+        constellation: 'kairoz',
+        createdAt: DateTime(2025, 8, 20),
+        path: '~/Messages/WhatsApp/nexus_pitch.txt',
+      ),
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'Kairoz demo link',
+        content: 'Here\'s the demo link: https://kairoz.ai/demo. Password: nexus2025',
+        type: 'message',
+        constellation: 'kairoz',
+        createdAt: DateTime(2025, 8, 22),
+        path: '~/Messages/SMS/kairoz_demo.txt',
+      ),
+      
+      // Images
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'vacation_photo.jpg',
+        content: 'Beautiful sunset at Maldives resort. Taken August 2025. Crystal clear water.',
+        type: 'image',
+        constellation: 'personal',
+        createdAt: DateTime(2025, 8, 27),
+        path: '~/Pictures/vacation_photo.jpg',
+      ),
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'team_meeting.jpg',
+        content: 'Kairoz team meeting photo. Whiteboard with architecture diagrams.',
+        type: 'image',
+        constellation: 'kairoz',
+        createdAt: DateTime(2025, 8, 25),
+        path: '~/Pictures/team_meeting.jpg',
+      ),
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'resume_2025.pdf',
+        content: 'Updated resume with latest experience. Kairoz co-founder, Flutter developer.',
+        type: 'file',
+        constellation: 'work',
+        createdAt: DateTime(2025, 8, 1),
+        path: '~/Documents/resume_2025.pdf',
+      ),
+      DataItem(
+        id: const Uuid().v4(),
+        title: 'project_notes.txt',
+        content: 'Nexus project notes. Privacy-first AI, cosmic UI, on-device processing.',
+        type: 'file',
+        constellation: 'kairoz',
+        createdAt: DateTime(2025, 8, 5),
+        path: '~/Documents/project_notes.txt',
+      ),
+    ];
+    
+    _generateOrbs();
+    notifyListeners();
+  }
+
+  void _generateOrbs() {
+    _orbs.clear();
+    final random = math.Random(42); // Fixed seed for consistent layout
+    
+    for (int i = 0; i < _dataItems.length; i++) {
+      final item = _dataItems[i];
+      final angle = (i * 2 * math.pi / _dataItems.length) + random.nextDouble() * 0.5;
+      final radius = 150.0 + random.nextDouble() * 100.0;
+      
+      _orbs.add(Orb(
+        data: item,
+        position: Offset(
+          math.cos(angle) * radius,
+          math.sin(angle) * radius,
+        ),
+        radius: 20.0 + random.nextDouble() * 15.0,
+        color: _getOrbColor(item.constellation),
+        pulsePhase: random.nextDouble() * 2 * math.pi,
+      ));
+    }
+  }
+
+  Color _getOrbColor(String constellation) {
+    switch (constellation) {
+      case 'work':
+        return Colors.blue;
+      case 'personal':
+        return Colors.green;
+      case 'kairoz':
+        return Colors.purple;
+      default:
+        return Colors.orange;
+    }
+  }
+
+  // Simulate FAISS indexing
+  void _simulateIndexing() async {
+    _isIndexing = true;
+    notifyListeners();
+    
+    await Future.delayed(const Duration(seconds: 2));
+    print('Indexing ${_dataItems.length} items...');
+    print('FAISS index created successfully');
+    print('Embeddings generated for all data items');
+    
+    _isIndexing = false;
+    notifyListeners();
+  }
+
+  // Search functionality (simulated RAG)
+  void search(String query) async {
+    if (query.trim().isEmpty) {
+      _searchResults.clear();
+      _isSearching = false;
+      notifyListeners();
+      return;
+    }
+
+    _currentQuery = query;
+    _isSearching = true;
+    _isProcessing = true;
+    notifyListeners();
+
+    // Simulate on-device processing delay
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    // Simple string search (placeholder for FAISS/Phi-3)
+    final results = _dataItems.where((item) {
+      final searchText = '${item.title} ${item.content}'.toLowerCase();
+      final queryLower = query.toLowerCase();
+      return searchText.contains(queryLower);
+    }).toList();
+
+    // Calculate relevance scores
+    for (var item in results) {
+      final searchText = '${item.title} ${item.content}'.toLowerCase();
+      final queryLower = query.toLowerCase();
+      final words = queryLower.split(' ');
+      double relevance = 0.0;
+      
+      for (final word in words) {
+        if (searchText.contains(word)) {
+          relevance += 0.2;
+        }
+      }
+      
+      // Boost title matches
+      if (item.title.toLowerCase().contains(queryLower)) {
+        relevance += 0.3;
+      }
+      
+      item = DataItem(
+        id: item.id,
+        title: item.title,
+        content: item.content,
+        type: item.type,
+        constellation: item.constellation,
+        createdAt: item.createdAt,
+        path: item.path,
+        relevance: relevance.clamp(0.0, 1.0),
+      );
+    }
+
+    // Sort by relevance
+    results.sort((a, b) => b.relevance.compareTo(a.relevance));
+    
+    _searchResults = results;
+    _isSearching = false;
+    _isProcessing = false;
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    _currentQuery = '';
+    _searchResults.clear();
+    _isSearching = false;
+    notifyListeners();
+  }
+
+  void setTheme(String theme) {
+    _selectedTheme = theme;
+    notifyListeners();
+  }
+
+  // Voice input
+  void startVoiceInput() async {
+    if (!_speechEnabled) return;
+    
+    _isVoiceListening = true;
+    notifyListeners();
+    
+    await _speech.listen(
+      onResult: (result) {
+        if (result.finalResult) {
+          _currentQuery = result.recognizedWords;
+          search(_currentQuery);
+          _isVoiceListening = false;
+          notifyListeners();
+        }
+      },
+    );
+  }
+
+  void stopVoiceInput() {
+    _speech.stop();
+    _isVoiceListening = false;
+    notifyListeners();
+  }
+
+  // File upload simulation
+  void addFakeFile() async {
+    _isProcessing = true;
+    notifyListeners();
+    
+    await Future.delayed(const Duration(seconds: 1));
+    
+    final newItem = DataItem(
+      id: const Uuid().v4(),
+      title: 'uploaded_file_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      content: 'Newly uploaded file with AI-generated content analysis.',
+      type: 'file',
+      constellation: 'personal',
+      createdAt: DateTime.now(),
+      path: '~/Documents/uploaded_file.pdf',
+    );
+    
+    _dataItems.add(newItem);
+    _generateOrbs();
+    _isProcessing = false;
+    notifyListeners();
+  }
+}
+
+// ============================================================================
+// THEME DATA
+// ============================================================================
+
+class NexusTheme {
+  static const Map<String, Map<String, Color>> themes = {
+    'dark': {
+      'background': Color(0xFF0A0A0A),
+      'surface': Color(0xFF1A1A1A),
+      'primary': Color(0xFF00D4FF),
+      'secondary': Color(0xFF6C63FF),
+      'text': Color(0xFFFFFFFF),
+      'textSecondary': Color(0xFFB0B0B0),
+    },
+    'light': {
+      'background': Color(0xFFF5F5F5),
+      'surface': Color(0xFFFFFFFF),
+      'primary': Color(0xFF2196F3),
+      'secondary': Color(0xFF673AB7),
+      'text': Color(0xFF000000),
+      'textSecondary': Color(0xFF666666),
+    },
+    'nepal_sunset': {
+      'background': Color(0xFF2C1810),
+      'surface': Color(0xFF3D2418),
+      'primary': Color(0xFFFF6B35),
+      'secondary': Color(0xFFFF8E53),
+      'text': Color(0xFFFFF8E1),
+      'textSecondary': Color(0xFFFFCC80),
+    },
+  };
+}
+
+// ============================================================================
+// MAIN APP
+// ============================================================================
+
+class NexusApp extends StatelessWidget {
+  const NexusApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<NexusDataProvider>(
+      builder: (context, provider, child) {
+        final themeColors = NexusTheme.themes[provider.selectedTheme]!;
+        
+        return MaterialApp(
+          title: 'Nexus AI Data Hub',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            brightness: provider.selectedTheme == 'dark' ? Brightness.dark : Brightness.light,
+            primarySwatch: Colors.blue,
+            scaffoldBackgroundColor: themeColors['background'],
+            appBarTheme: AppBarTheme(
+              backgroundColor: themeColors['surface'],
+              elevation: 0,
+              titleTextStyle: TextStyle(
+                color: themeColors['text'],
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          home: const NexusDashboard(),
+        );
+      },
+    );
+  }
+}
+
+// ============================================================================
+// COSMIC DASHBOARD
+// ============================================================================
+
+class NexusDashboard extends StatefulWidget {
+  const NexusDashboard({super.key});
+
+  @override
+  State<NexusDashboard> createState() => _NexusDashboardState();
+}
+
+class _NexusDashboardState extends State<NexusDashboard>
+    with TickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late AnimationController _orbitController;
+  late AnimationController _shieldController;
+  final TextEditingController _queryController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+    
+    _orbitController = AnimationController(
+      duration: const Duration(seconds: 20),
+      vsync: this,
+    )..repeat();
+    
+    _shieldController = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _orbitController.dispose();
+    _shieldController.dispose();
+    _queryController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<NexusDataProvider>(
+      builder: (context, provider, child) {
+        final themeColors = NexusTheme.themes[provider.selectedTheme]!;
+        
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  themeColors['background']!,
+                  themeColors['background']!.withOpacity(0.8),
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(provider, themeColors),
+                  Expanded(
+                    child: provider.isSearching || provider.searchResults.isNotEmpty
+                        ? _buildSearchResults(provider, themeColors)
+                        : _buildCosmicDashboard(provider, themeColors),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHeader(NexusDataProvider provider, Map<String, Color> themeColors) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.home,
+                color: themeColors['primary'],
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Nexus',
+                style: TextStyle(
+                  color: themeColors['text'],
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              _buildPrivacyShield(provider, themeColors),
+              const SizedBox(width: 16),
+              _buildThemeSelector(provider, themeColors),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildQueryBar(provider, themeColors),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrivacyShield(NexusDataProvider provider, Map<String, Color> themeColors) {
+    return AnimatedBuilder(
+      animation: _shieldController,
+      builder: (context, child) {
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: themeColors['primary']!.withOpacity(0.1 + _shieldController.value * 0.2),
+          ),
+          child: Icon(
+            Icons.shield,
+            color: themeColors['primary'],
+            size: 20,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildThemeSelector(NexusDataProvider provider, Map<String, Color> themeColors) {
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.palette, color: themeColors['text']),
+      onSelected: provider.setTheme,
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: 'dark', child: Text('Dark')),
+        const PopupMenuItem(value: 'light', child: Text('Light')),
+        const PopupMenuItem(value: 'nepal_sunset', child: Text('Nepal Sunset')),
+      ],
+    );
+  }
+
+  Widget _buildQueryBar(NexusDataProvider provider, Map<String, Color> themeColors) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: themeColors['surface'],
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: provider.isVoiceListening 
+              ? themeColors['primary']! 
+              : themeColors['textSecondary']!.withOpacity(0.3),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: themeColors['primary']!.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: provider.isVoiceListening ? 2 : 0,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _queryController,
+              style: TextStyle(color: themeColors['text']),
+              decoration: InputDecoration(
+                hintText: 'Search your data...',
+                hintStyle: TextStyle(color: themeColors['textSecondary']),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              onSubmitted: provider.search,
+            ),
+          ),
+          if (provider.isProcessing)
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(themeColors['primary']!),
+              ),
+            )
+          else
+            IconButton(
+              icon: Icon(
+                provider.isVoiceListening ? Icons.mic : Icons.mic_none,
+                color: provider.isVoiceListening 
+                    ? themeColors['primary']! 
+                    : themeColors['textSecondary'],
+              ),
+              onPressed: provider.isVoiceListening 
+                  ? provider.stopVoiceInput 
+                  : provider.startVoiceInput,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCosmicDashboard(NexusDataProvider provider, Map<String, Color> themeColors) {
+    return Stack(
+      children: [
+        // Central sun
+        Center(
+          child: AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              return Container(
+                width: 80 + _pulseController.value * 20,
+                height: 80 + _pulseController.value * 20,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      themeColors['primary']!,
+                      themeColors['primary']!.withOpacity(0.3),
+                      Colors.transparent,
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: themeColors['primary']!.withOpacity(0.5),
+                      blurRadius: 20 + _pulseController.value * 10,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.search,
+                  color: Colors.white,
+                  size: 40,
+                ),
+              );
+            },
+          ),
+        ),
+        
+        // Orbiting data orbs
+        ...provider.orbs.map((orb) => _buildOrb(orb, provider, themeColors)),
+        
+        // Constellation labels
+        Positioned(
+          top: 50,
+          left: 20,
+          child: _buildConstellationLabel('Work', Colors.blue, themeColors),
+        ),
+        Positioned(
+          top: 50,
+          right: 20,
+          child: _buildConstellationLabel('Personal', Colors.green, themeColors),
+        ),
+        Positioned(
+          bottom: 50,
+          left: 20,
+          child: _buildConstellationLabel('Kairoz', Colors.purple, themeColors),
+        ),
+        
+        // Add file button
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: FloatingActionButton(
+            onPressed: provider.addFakeFile,
+            backgroundColor: themeColors['primary'],
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOrb(Orb orb, NexusDataProvider provider, Map<String, Color> themeColors) {
+    return AnimatedBuilder(
+      animation: _orbitController,
+      builder: (context, child) {
+        final angle = _orbitController.value * 2 * math.pi;
+        final offset = Offset(
+          orb.position.dx * math.cos(angle * 0.1) + MediaQuery.of(context).size.width / 2,
+          orb.position.dy * math.sin(angle * 0.1) + MediaQuery.of(context).size.height / 2,
+        );
+        
+        return Positioned(
+          left: offset.dx - orb.radius,
+          top: offset.dy - orb.radius,
+          child: GestureDetector(
+            onTap: () => _showDataDetails(orb.data, themeColors),
+            child: Container(
+              width: orb.radius * 2,
+              height: orb.radius * 2,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    orb.color,
+                    orb.color.withOpacity(0.7),
+                    orb.color.withOpacity(0.3),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: orb.color.withOpacity(0.5),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Icon(
+                _getDataIcon(orb.data.type),
+                color: Colors.white,
+                size: orb.radius * 0.8,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildConstellationLabel(String name, Color color, Map<String, Color> themeColors) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Text(
+        name,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchResults(NexusDataProvider provider, Map<String, Color> themeColors) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Search Results',
+                style: TextStyle(
+                  color: themeColors['text'],
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: provider.clearSearch,
+                child: Text(
+                  'Clear',
+                  style: TextStyle(color: themeColors['primary']),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView.builder(
+              itemCount: provider.searchResults.length,
+              itemBuilder: (context, index) {
+                final item = provider.searchResults[index];
+                return _buildSearchResultItem(item, themeColors);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchResultItem(DataItem item, Map<String, Color> themeColors) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: themeColors['surface'],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _getOrbColor(item.constellation).withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _getOrbColor(item.constellation).withOpacity(0.2),
+            ),
+            child: Icon(
+              _getDataIcon(item.type),
+              color: _getOrbColor(item.constellation),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: TextStyle(
+                    color: themeColors['text'],
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.content,
+                  style: TextStyle(
+                    color: themeColors['textSecondary'],
+                    fontSize: 14,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${item.type.toUpperCase()} • ${item.constellation} • ${_formatDate(item.createdAt)}',
+                  style: TextStyle(
+                    color: themeColors['textSecondary'],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (item.relevance > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: themeColors['primary']!.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '${(item.relevance * 100).toInt()}%',
+                style: TextStyle(
+                  color: themeColors['primary'],
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getDataIcon(String type) {
+    switch (type) {
+      case 'file':
+        return Icons.description;
+      case 'email':
+        return Icons.email;
+      case 'message':
+        return Icons.message;
+      case 'image':
+        return Icons.image;
+      default:
+        return Icons.file_present;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.month}/${date.day}/${date.year}';
+  }
+
+  void _showDataDetails(DataItem item, Map<String, Color> themeColors) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: themeColors['surface'],
+        title: Text(
+          item.title,
+          style: TextStyle(color: themeColors['text']),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              item.content,
+              style: TextStyle(color: themeColors['textSecondary']),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Type: ${item.type}',
+              style: TextStyle(color: themeColors['textSecondary']),
+            ),
+            Text(
+              'Constellation: ${item.constellation}',
+              style: TextStyle(color: themeColors['textSecondary']),
+            ),
+            Text(
+              'Created: ${_formatDate(item.createdAt)}',
+              style: TextStyle(color: themeColors['textSecondary']),
+            ),
+            Text(
+              'Path: ${item.path}',
+              style: TextStyle(color: themeColors['textSecondary']),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Close',
+              style: TextStyle(color: themeColors['primary']),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

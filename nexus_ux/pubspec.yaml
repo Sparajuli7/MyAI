@@ -1,0 +1,27 @@
+name: nexus_ux
+description: A privacy-first AI data hub with cosmic dashboard design
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  provider: ^6.0.0
+  file_picker: ^5.2.0
+  uuid: ^3.0.6
+  speech_to_text: ^6.1.0
+  flare_flutter: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
