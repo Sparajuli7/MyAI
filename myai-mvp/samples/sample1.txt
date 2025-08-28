@@ -1,0 +1,28 @@
+Kairoz MVP Meeting Notes
+
+Date: November 1st, 2025
+Attendees: Team Lead, Developers, Product Manager
+
+Agenda:
+1. Demo presentation preparation
+2. Technical architecture review
+3. Investor pitch deck updates
+
+Key Points:
+- Demo needs to showcase privacy-first AI capabilities
+- Focus on local processing and data security
+- Prepare technical overview for non-technical investors
+- Update pitch deck with latest metrics and achievements
+
+Action Items:
+- Complete demo by October 30th
+- Review and finalize pitch deck
+- Prepare Q&A responses for investor meeting
+- Schedule technical deep-dive session
+
+Next Steps:
+- Final demo rehearsal on October 31st
+- Investor meeting scheduled for November 1st
+- Follow-up meeting to discuss feedback and next phase
+
+The team is confident about the MVP readiness and excited to present to potential investors.

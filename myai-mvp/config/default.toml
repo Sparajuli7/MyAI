@@ -1,0 +1,26 @@
+[paths]
+dataDir = "~/.myai-mvp/data"
+modelDir = "~/.myai-mvp/models"
+watchPaths = []
+
+[api]
+bind = "127.0.0.1:7777"
+corsOrigins = ["http://localhost:3000", "http://localhost:8080"]
+
+[retrieval]
+bm25K1 = 1.2
+annEf = 100
+annM = 16
+alpha = 0.35
+beta = 0.65
+rerankTop = 50
+finalTop = 10
+
+[privacy]
+enableSqlcipher = false
+maxFileMb = 500
+allowedMimeGroups = ["pdf", "text"]
+
+[ingest]
+chunkSize = 800
+overlap = 120

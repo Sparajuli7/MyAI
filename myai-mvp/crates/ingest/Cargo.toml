@@ -1,0 +1,19 @@
+[package]
+name = "ingest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+types = { path = "../types" }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+mime_guess = { workspace = true }
+walkdir = { workspace = true }
+blake3 = { workspace = true }
+bytes = { workspace = true }
+async-trait = { workspace = true }

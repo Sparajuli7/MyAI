@@ -1,0 +1,16 @@
+[package]
+name = "eval"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+types = { path = "../types" }
+retrieval = { path = "../retrieval" }
+models = { path = "../models" }
+storage = { path = "../storage" }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+clap = { workspace = true }
