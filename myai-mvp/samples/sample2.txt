@@ -1,31 +1,31 @@
-Visa Extension Update
+Document Status Update
 
-Status: APPROVED
-Application Date: August 15, 2025
-Decision Date: August 27, 2025
-Extension Period: Until December 2025
+Status: PENDING REVIEW
+Submission Date: August 15, 2025
+Last Updated: August 27, 2025
+Expected Completion: December 2025
 
 Important Information:
-- OPT extension has been approved
-- New EAD card will be mailed within 2-3 weeks
-- Current status remains valid during processing
-- No additional documentation required at this time
+- Application is currently under review
+- Processing time estimated at 2-3 weeks
+- Current status remains active during review
+- Additional documentation may be requested
 
 Next Steps:
-1. Monitor mail for new EAD card
-2. Update employer records with new expiration date
-3. Schedule biometrics appointment if required
-4. Maintain valid passport throughout extension period
+1. Monitor for status updates
+2. Prepare any requested documentation
+3. Schedule follow-up appointments if needed
+4. Maintain current documentation throughout process
 
 Contact Information:
-- USCIS Customer Service: 1-800-375-5283
-- Case Status: Available online at uscis.gov
-- Local USCIS Office: Available for in-person inquiries
+- General Support: 1-800-123-4567
+- Status Updates: Available online at example.gov
+- Local Office: Available for in-person inquiries
 
 Reminders:
 - Keep all documentation organized
-- Maintain valid status throughout extension
-- Report any address changes within 10 days
-- Plan for next extension application if needed
+- Maintain current status throughout process
+- Report any changes within required timeframe
+- Plan for next steps if needed
 
-This approval provides additional time to continue work and development on the Kairoz project.
+This process will provide additional time to continue current activities and projects.
