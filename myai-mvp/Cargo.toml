@@ -33,7 +33,7 @@ axum = { workspace = true }
 # HTTP/WebSocket
 axum = "0.7"
 tower = "0.4"
-tower-http = { version = "0.5", features = ["cors", "trace"] }
+tower-http = { version = "0.5", features = ["cors", "trace", "fs"] }
 tokio = { version = "1", features = ["full"] }
 hyper = "1"
 tokio-tungstenite = "0.21"
@@ -67,7 +67,7 @@ async-trait = "0.1"
 
 # Search/ANN
 tantivy = "0.22"
-hnsw_rs = "0.6"
+hnsw_rs = "0.3.2"
 
 # Models (ONNX)
 ort = { version = "2.0.0-rc.10", features = ["download-binaries"] }

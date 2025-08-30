@@ -1,18 +1,28 @@
-# MyAI - Personal AGI with Privacy
+# MyAI UX - Interactive Knowledge Graph + LLM Interface
 
-A privacy-first AI data hub with a cosmic dashboard design, built with Flutter. MyAI provides a futuristic interface for querying user data across devices with on-device processing - your personal AI assistant that keeps everything private.
+A privacy-first AI data hub with interactive knowledge graph visualization and local LLM integration, built with Flutter. MyAI provides an intuitive interface for exploring interconnected data and querying it with local AI models - your personal AI assistant that keeps everything private.
 
 ## Features
 
-### 🌌 Cosmic Dashboard
-- **3D Orbital Interface**: Data appears as glowing orbs orbiting a central query "sun"
-- **Constellation Clustering**: Data grouped into thematic clusters (Work, Personal, Kairoz)
-- **Smooth Animations**: Pulsating central sun, orbiting data orbs, and animated transitions
+### 🕸️ Interactive Knowledge Graph
+- **Node-Link Visualization**: Data appears as interconnected nodes showing relationships
+- **Force-Directed Layout**: Dynamic positioning with real-time graph algorithms
+- **Multi-Selection**: Click nodes to select multiple documents for AI analysis
+- **Relationship Detection**: Automatic semantic, temporal, and entity-based connections
+- **Constellation Clustering**: Data grouped by type (Personal, Work, Kairoz)
+- **Smooth Animations**: Pulsating nodes, animated connections, and fluid interactions
 
-### 🔍 Search & Query
-- **Text & Voice Input**: Natural language queries with speech-to-text support
-- **Simulated RAG**: String-based search with relevance scoring (placeholder for FAISS/Phi-3)
-- **Real-time Results**: Instant search results with relevance percentages
+### 🤖 Local LLM Integration
+- **Ollama Support**: Built-in integration with local Ollama models
+- **Document-Aware Queries**: Ask questions about selected documents with full context
+- **Streaming Responses**: Real-time AI responses with progress indicators
+- **Model Support**: Optimized for gemma3:270m and other small, fast models
+- **Chat Interface**: Persistent conversation history with selected documents
+
+### 🔍 Advanced Search & Discovery
+- **Graph-Based Navigation**: Explore data through visual connections
+- **Real-time Results**: Instant search with relevance scoring
+- **Context-Aware**: Understanding document relationships and dependencies
 
 ### 🛡️ Privacy Features
 - **On-Device Processing**: All data processing happens locally
@@ -30,12 +40,22 @@ A privacy-first AI data hub with a cosmic dashboard design, built with Flutter. 
 - **Messages**: WhatsApp and SMS conversations
 - **Images**: Vacation photos, team meeting photos
 
-## Setup Instructions
+## Quick Setup
 
 ### Prerequisites
-1. Install Flutter SDK (https://flutter.dev/docs/get-started/install)
-2. Ensure Flutter is in your PATH
-3. Run `flutter doctor` to verify installation
+1. **Flutter SDK**: Download from https://flutter.dev/docs/get-started/install
+2. **Ollama**: For local LLM support
+   ```bash
+   # Windows
+   iwr -useb https://ollama.ai/install.ps1 | iex
+   
+   # Mac/Linux
+   curl -fsSL https://ollama.ai/install.sh | sh
+   ```
+3. **LLM Model**: Pull recommended model
+   ```bash
+   ollama pull gemma3:270m
+   ```
 
 ### Installation
 1. Navigate to the project directory:
@@ -50,8 +70,10 @@ A privacy-first AI data hub with a cosmic dashboard design, built with Flutter. 
 
 3. Run the app:
    ```bash
-   flutter run
+   flutter run -d chrome --web-port 8080
    ```
+
+4. Access at: `http://localhost:8080`
 
 ### Platform Support
 - **iOS**: `flutter run -d ios`
@@ -61,31 +83,41 @@ A privacy-first AI data hub with a cosmic dashboard design, built with Flutter. 
 
 ## Usage
 
-### Main Interface
-1. **Home Button**: Returns to the cosmic dashboard view
-2. **Query Bar**: Type or use voice input to search your data
-3. **Privacy Shield**: Pulsing indicator showing secure processing
-4. **Theme Selector**: Switch between Dark, Light, and Nepal Sunset themes
+### Knowledge Graph Interface
+1. **Graph View**: Interactive node-link visualization of your data
+2. **Node Selection**: Click nodes to select them (white ring appears)
+3. **Multi-Selection**: Select multiple documents for AI analysis
+4. **Info Panel**: View selected documents in bottom-left panel
+5. **Theme Selector**: Switch between Dark, Light, and Nepal Sunset themes
 
-### Search Functionality
-1. **Text Search**: Type queries like "find my visa email" or "Kairoz demo"
-2. **Voice Search**: Tap the microphone icon and speak your query
-3. **Results**: View search results with relevance scores and content snippets
-4. **Clear**: Reset search and return to dashboard
+### AI Assistant
+1. **Activate AI Panel**: Click the brain/psychology icon to open
+2. **Document Context**: AI has access to selected documents
+3. **Natural Queries**: Ask questions about your data in plain language
+4. **Streaming Responses**: Watch AI responses appear in real-time
+5. **Chat History**: Previous conversations are preserved
 
-### Data Interaction
-1. **Orb Tapping**: Tap any glowing orb to view detailed information
-2. **Constellation Labels**: See data grouped by category (Work, Personal, Kairoz)
-3. **Add Files**: Use the floating action button to simulate file uploads
+### Example Queries
+With demo data selected, try:
+- "What is my visa status?"
+- "Summarize the meeting notes"
+- "When do I need to renew my documents?"
+- "What are the key topics in these documents?"
+
+### Graph Navigation
+1. **Pan**: Click and drag to move around the graph
+2. **Zoom**: Use mouse wheel to zoom in/out (future feature)
+3. **Node Types**: Different colors represent different data types
+4. **Connections**: Lines show relationships between documents
 
 ## Technical Details
 
 ### Dependencies
-- `provider`: State management
-- `file_picker`: File upload simulation
+- `provider`: State management for reactive UI
 - `uuid`: Unique data identifiers
-- `speech_to_text`: Voice input functionality
-- `flare_flutter`: 3D animations (optional)
+- `http`: HTTP client for Ollama API communication
+- `file_picker`: File upload simulation
+- `flutter/gestures`: Touch and pointer event handling
 
 ### Architecture
 - **State Management**: Provider pattern for reactive UI updates

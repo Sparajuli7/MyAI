@@ -1,58 +1,5 @@
 # MyAI MVP - Personal AGI with Privacy
 
-**Your personal AI assistant that keeps your data private and secure.**
-
-A high-performance, local-first AI data hub with hybrid dense retrieval (BM25 + ANN + reranking) designed to work seamlessly with your Flutter frontend. Think of it as your **personal AGI with privacy** - an AI that knows everything about your data but never shares it with anyone else.
-
-## Features
-
-### 🤖 **Personal AGI Experience**
-- **Your AI, Your Data**: Everything stays on your device - no cloud, no sharing
-- **Understands Everything**: Searches across all your files, emails, messages, and documents
-- **Instant Answers**: Get relevant information from your personal data in milliseconds
-- **Smart Context**: AI that actually knows your life and work
-
-### 🚀 **Performance**
-- **Sub-300ms queries**: Hybrid BM25 + HNSW + lightweight reranking
-- **Local-only processing**: No data leaves your device
-- **Streaming results**: Real-time partial results via SSE
-- **Concurrent processing**: Async/await throughout
-
-### 🔍 **Hybrid Retrieval**
-- **BM25**: Traditional keyword search via Tantivy
-- **ANN**: Semantic search via HNSW with MiniLM embeddings
-- **Reranking**: Cross-encoder reranking with BGE-small
-- **Reasoning traces**: Detailed search pipeline insights
-
-### 🛡️ **Privacy & Security**
-- **100% Private**: Your data never leaves your device - not even metadata
-- **Local storage**: SQLite with optional SQLCipher encryption
-- **File validation**: MIME type allowlist and size limits
-- **No telemetry**: Zero data transmission to any external service
-- **Audit trail**: Complete reasoning traces so you know how AI found your data
-
-### 📁 **Ingestion**
-- **Multiple formats**: TXT, MD, PDF (extensible)
-- **Smart chunking**: Configurable size with overlap
-- **Deduplication**: Blake3-based content hashing
-- **Batch processing**: Efficient bulk operations
-- **Drag & Drop**: Easy file upload through the Flutter interface
-
-## Quick Start
-
-### What You're Getting
-
-**MyAI MVP** is your personal AI assistant that:
-- 🔒 **Keeps everything private** - No data ever leaves your device
-- 🧠 **Understands your data** - Searches across files, emails, messages, documents
-- ⚡ **Answers instantly** - Gets you relevant information in milliseconds
-- 🤖 **Works like AGI** - But focused on your personal data
-
-### Prerequisites
-
-1. **Rust toolchain**: Install via [rustup](https://rustup.rs/)
-2. **ONNX models**: Download required models (see below)
-
 ### Installation
 
 ```bash
@@ -199,6 +146,61 @@ allowedMimeGroups = ["pdf", "text"]
 chunkSize = 800
 overlap = 120
 ```
+
+
+**Your personal AI assistant that keeps your data private and secure.**
+
+A high-performance, local-first AI data hub with hybrid dense retrieval (BM25 + ANN + reranking) designed to work seamlessly with your Flutter frontend. Think of it as your **personal AGI with privacy** - an AI that knows everything about your data but never shares it with anyone else.
+
+## Features
+
+### 🤖 **Personal AGI Experience**
+- **Your AI, Your Data**: Everything stays on your device - no cloud, no sharing
+- **Understands Everything**: Searches across all your files, emails, messages, and documents
+- **Instant Answers**: Get relevant information from your personal data in milliseconds
+- **Smart Context**: AI that actually knows your life and work
+
+### 🚀 **Performance**
+- **Sub-300ms queries**: Hybrid BM25 + HNSW + lightweight reranking
+- **Local-only processing**: No data leaves your device
+- **Streaming results**: Real-time partial results via SSE
+- **Concurrent processing**: Async/await throughout
+
+### 🔍 **Hybrid Retrieval**
+- **BM25**: Traditional keyword search via Tantivy
+- **ANN**: Semantic search via HNSW with MiniLM embeddings
+- **Reranking**: Cross-encoder reranking with BGE-small
+- **Reasoning traces**: Detailed search pipeline insights
+
+### 🛡️ **Privacy & Security**
+- **100% Private**: Your data never leaves your device - not even metadata
+- **Local storage**: SQLite with optional SQLCipher encryption
+- **File validation**: MIME type allowlist and size limits
+- **No telemetry**: Zero data transmission to any external service
+- **Audit trail**: Complete reasoning traces so you know how AI found your data
+
+### 📁 **Ingestion**
+- **Multiple formats**: TXT, MD, PDF (extensible)
+- **Smart chunking**: Configurable size with overlap
+- **Deduplication**: Blake3-based content hashing
+- **Batch processing**: Efficient bulk operations
+- **Drag & Drop**: Easy file upload through the Flutter interface
+
+## Quick Start
+
+### What You're Getting
+
+**MyAI MVP** is your personal AI assistant that:
+- 🔒 **Keeps everything private** - No data ever leaves your device
+- 🧠 **Understands your data** - Searches across files, emails, messages, documents
+- ⚡ **Answers instantly** - Gets you relevant information in milliseconds
+- 🤖 **Works like AGI** - But focused on your personal data
+
+### Prerequisites
+
+1. **Rust toolchain**: Install via [rustup](https://rustup.rs/)
+2. **ONNX models**: Download required models (see below)
+
 
 ## Architecture
 

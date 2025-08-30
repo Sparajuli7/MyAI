@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(C:\\Users\\Baldw\\Downloads/**)",
+      "Read(C:\\Users\\Baldw\\Downloads/**)",
+      "Bash(powershell:*)",
+      "Bash(export PATH=\"$PATH:/c/Users/Baldw/flutter/bin\")",
+      "Bash(flutter:*)",
+      "Bash(\"/c/Users/Baldw/flutter/bin/flutter.bat\" --version)",
+      "Read(C:\\Users\\Baldw\\flutter/**)",
+      "Read(C:\\Users\\Baldw\\flutter\\flutter/**)",
+      "Read(C:\\Users\\Baldw\\flutter\\flutter\\bin/**)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" --version)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" doctor)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" pub get)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" run -d windows)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" config --enable-windows-desktop)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" create --platforms=windows .)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" run -d chrome)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" clean)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" build web)",
+      "Bash(python:*)",
+      "Bash(start chrome \"file:///C:/Users/Baldw/dev/MyAI/myai_ux/build/web/index.html\")",
+      "Bash(npx http-server:*)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" run -d chrome --web-port 8080 --release)",
+      "Bash(start chrome \"http://localhost:8080\")",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" run -d chrome --web-port 8080)",
+      "Bash(curl:*)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" analyze)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" run -t lib/main_simple.dart -d chrome --web-port 8080)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" build web --release)",
+      "Bash(ollama serve:*)",
+      "Read(C:\\Users\\Baldw\\Downloads/**)",
+      "Bash(ollama:*)",
+      "Bash(\"C:\\Users\\Baldw\\flutter\\flutter\\bin\\flutter.bat\" hot-reload)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyAI - Personal AGI with Privacy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #e5e5e5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00d4ff, #7c4dff, #ff4d6d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .status-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .search-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #e5e5e5;
+            font-size: 1rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .search-button {
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #7c4dff, #00d4ff);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #7c4dff;
+            background: rgba(124, 77, 255, 0.1);
+        }
+
+        .results-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 300px;
+            display: none;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #7c4dff;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-snippet {
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        .result-score {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            color: #7c4dff;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(124, 77, 255, 0.3);
+            border-top: 3px solid #7c4dff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MyAI</h1>
+            <p>Your Personal AGI with Privacy • Everything stays on your device • Instant answers from your data</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span id="status-text">Connected • Ready to search</span>
+            </div>
+            <div id="doc-count">Documents: Loading...</div>
+        </div>
+
+        <div class="search-container">
+            <h2 style="margin-bottom: 1rem; color: #00d4ff;">🔍 Ask anything about your data</h2>
+            <form class="search-form" id="search-form">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="search-input" 
+                    placeholder="e.g., 'Find my visa documents' or 'What was discussed in the meeting?'"
+                    required
+                >
+                <button type="submit" class="search-button">Search</button>
+            </form>
+        </div>
+
+        <div class="upload-section">
+            <h2 style="margin-bottom: 1rem; color: #00d4ff;">📁 Add your documents</h2>
+            <div class="upload-area" id="upload-area">
+                <div style="margin-bottom: 1rem; font-size: 3rem;">📄</div>
+                <p style="margin-bottom: 0.5rem; font-weight: 600;">Drop files here or click to browse</p>
+                <p style="color: #888; font-size: 0.9rem;">Supports PDF, TXT, MD files • Everything stays private on your device</p>
+                <input type="file" id="file-input" style="display: none;" multiple accept=".pdf,.txt,.md">
+            </div>
+        </div>
+
+        <div class="results-container" id="results-container">
+            <h2 style="margin-bottom: 1rem; color: #00d4ff;">📋 Search Results</h2>
+            <div id="results-content"></div>
+        </div>
+
+        <div class="footer">
+            <p>MyAI MVP • Privacy-first Personal AGI • Your data never leaves this device</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:7777/api';
+        
+        // Load status on page load
+        loadStatus();
+        
+        // Search functionality
+        document.getElementById('search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+            
+            const resultsContainer = document.getElementById('results-container');
+            const resultsContent = document.getElementById('results-content');
+            
+            resultsContainer.style.display = 'block';
+            resultsContent.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, k: 10, stream: false })
+                });
+                
+                const data = await response.json();
+                displayResults(data.results || []);
+            } catch (error) {
+                resultsContent.innerHTML = `<div style="color: #ff4d6d; text-align: center;">Error: ${error.message}</div>`;
+            }
+        });
+        
+        // File upload functionality
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => e.preventDefault());
+        uploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+        
+        async function handleDrop(e) {
+            e.preventDefault();
+            handleFiles(e.dataTransfer.files);
+        }
+        
+        async function handleFiles(files) {
+            for (const file of files) {
+                await uploadFile(file);
+            }
+            loadStatus(); // Refresh status
+        }
+        
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${API_BASE}/ingest/file`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    console.log(`Uploaded: ${file.name}`);
+                } else {
+                    console.error(`Failed to upload: ${file.name}`);
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+            }
+        }
+        
+        async function loadStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/status`);
+                const data = await response.json();
+                document.getElementById('doc-count').textContent = 
+                    `Documents: ${data.document_count} • Chunks: ${data.chunk_count}`;
+            } catch (error) {
+                document.getElementById('status-text').textContent = 'Disconnected • Check if server is running';
+                document.querySelector('.status-dot').style.background = '#ff4d6d';
+            }
+        }
+        
+        function displayResults(results) {
+            const resultsContent = document.getElementById('results-content');
+            
+            if (!results.length) {
+                resultsContent.innerHTML = '<div style="text-align: center; color: #888;">No results found. Try adding some documents first!</div>';
+                return;
+            }
+            
+            resultsContent.innerHTML = results.map(result => `
+                <div class="result-item">
+                    <div class="result-title">${result.title || 'Document'}</div>
+                    <div class="result-snippet">${result.snippet || result.content}</div>
+                    <div class="result-score">Score: ${(result.score * 100).toFixed(1)}%</div>
+                </div>
+            `).join('');
+        }
+        
+        // Auto-refresh status every 30 seconds
+        setInterval(loadStatus, 30000);
+    </script>
+</body>
+</html>

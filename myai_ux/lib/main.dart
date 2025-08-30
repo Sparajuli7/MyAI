@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:math' as math;
 import 'dart:async';
+import 'widgets/demo_controls.dart';
+import 'widgets/simple_graph_widget.dart';
+import 'widgets/simple_llm_panel.dart';
+import 'widgets/enhanced_graph_widget.dart';
+import 'widgets/enhanced_llm_panel.dart';
+// import 'widgets/knowledge_graph_widget.dart';
+// import 'widgets/llm_export_panel.dart';
+import 'services/demo_data.dart';
 
 void main() {
   runApp(
@@ -71,8 +77,9 @@ class MyAIDataProvider extends ChangeNotifier {
   bool _isProcessing = false;
   String _selectedTheme = 'dark';
   bool _isVoiceListening = false;
-  final stt.SpeechToText _speech = stt.SpeechToText();
-  bool _speechEnabled = false;
+  bool _speechEnabled = false; // Placeholder - speech disabled for demo
+  bool _isDemoMode = true; // Start in demo mode
+  bool _backendConnected = false;
 
   List<DataItem> get dataItems => _dataItems;
   List<Orb> get orbs => _orbs;
@@ -84,15 +91,47 @@ class MyAIDataProvider extends ChangeNotifier {
   String get selectedTheme => _selectedTheme;
   bool get isVoiceListening => _isVoiceListening;
   bool get speechEnabled => _speechEnabled;
+  bool get isDemoMode => _isDemoMode;
+  bool get backendConnected => _backendConnected;
 
   MyAIDataProvider() {
     _initializeSpeech();
-    _seedFakeData();
+    _loadInitialData();
+  }
+
+  void _loadInitialData() {
+    if (_isDemoMode) {
+      _loadDemoData();
+    } else {
+      _loadRealData();
+    }
+  }
+
+  void _loadDemoData() {
+    // Load rich interconnected demo data
+    _dataItems = DemoData.richDemoData;
+    _generateOrbs();
     _simulateIndexing();
+    notifyListeners();
+  }
+
+  void _loadRealData() {
+    // This will be populated from the real backend
+    _dataItems = [];
+    _generateOrbs();
+    notifyListeners();
+  }
+
+  void toggleDemoMode() {
+    _isDemoMode = !_isDemoMode;
+    _loadInitialData();
+    _clearSearch();
+    notifyListeners();
   }
 
   void _initializeSpeech() async {
-    _speechEnabled = await _speech.initialize();
+    // Speech functionality disabled for demo
+    _speechEnabled = false;
     notifyListeners();
   }
 
@@ -315,6 +354,10 @@ class MyAIDataProvider extends ChangeNotifier {
   }
 
   void clearSearch() {
+    _clearSearch();
+  }
+
+  void _clearSearch() {
     _currentQuery = '';
     _searchResults.clear();
     _isSearching = false;
@@ -326,27 +369,13 @@ class MyAIDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Voice input
+  // Voice input (disabled for demo)
   void startVoiceInput() async {
     if (!_speechEnabled) return;
-    
-    _isVoiceListening = true;
-    notifyListeners();
-    
-    await _speech.listen(
-      onResult: (result) {
-        if (result.finalResult) {
-          _currentQuery = result.recognizedWords;
-          search(_currentQuery);
-          _isVoiceListening = false;
-          notifyListeners();
-        }
-      },
-    );
+    // Voice functionality disabled for web demo
   }
 
   void stopVoiceInput() {
-    _speech.stop();
     _isVoiceListening = false;
     notifyListeners();
   }
@@ -462,6 +491,9 @@ class _MyAIDashboardState extends State<MyAIDashboard>
   late AnimationController _orbitController;
   late AnimationController _shieldController;
   final TextEditingController _queryController = TextEditingController();
+  Set<String> _selectedDocuments = {};
+  bool _showKnowledgeGraph = true;
+  bool _showLLMPanel = true;
 
   @override
   void initState() {
@@ -514,9 +546,29 @@ class _MyAIDashboardState extends State<MyAIDashboard>
                 children: [
                   _buildHeader(provider, themeColors),
                   Expanded(
-                    child: provider.isSearching || provider.searchResults.isNotEmpty
-                        ? _buildSearchResults(provider, themeColors)
-                        : _buildCosmicDashboard(provider, themeColors),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: provider.isSearching || provider.searchResults.isNotEmpty
+                              ? _buildSearchResults(provider, themeColors)
+                              : _showKnowledgeGraph
+                                  ? SimpleGraphWidget(
+                                      onSelectionChanged: (selectedIds) {
+                                        setState(() {
+                                          _selectedDocuments = selectedIds;
+                                        });
+                                      },
+                                    )
+                                  : _buildCosmicDashboard(provider, themeColors),
+                        ),
+                        // Enhanced LLM Panel
+                        if (_showLLMPanel)
+                          EnhancedLLMPanel(
+                            selectedDocumentIds: _selectedDocuments,
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -540,6 +592,20 @@ class _MyAIDashboardState extends State<MyAIDashboard>
                 size: 28,
               ),
               const SizedBox(width: 12),
+              
+              // Simple graph toggle
+              IconButton(
+                icon: Icon(
+                  _showKnowledgeGraph ? Icons.account_tree : Icons.bubble_chart,
+                  color: themeColors['primary'],
+                  size: 20,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _showKnowledgeGraph = !_showKnowledgeGraph;
+                  });
+                },
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -815,6 +881,13 @@ class _MyAIDashboardState extends State<MyAIDashboard>
           child: _buildConstellationLabel('Kairoz', Colors.purple, themeColors),
         ),
         
+        // Demo controls (top left)
+        Positioned(
+          top: 20,
+          left: 20,
+          child: DemoControls(),
+        ),
+
         // Privacy message
         Positioned(
           bottom: 50,
@@ -1487,35 +1560,171 @@ class _MyAIDashboardState extends State<MyAIDashboard>
 
   Future<void> _openFile(DataItem item) async {
     try {
-      // Handle different file types
-      if (item.type == 'email') {
-        // For emails, try to open in default email client
-        final emailUri = Uri.parse('mailto:?subject=${Uri.encodeComponent(item.title)}&body=${Uri.encodeComponent(item.content)}');
-        if (await canLaunchUrl(emailUri)) {
-          await launchUrl(emailUri);
-        }
-      } else if (item.type == 'message') {
-        // For messages, try to extract URLs and open them
-        final urlRegex = RegExp(r'https?://[^\s]+');
-        final match = urlRegex.firstMatch(item.content);
-        if (match != null) {
-          final url = Uri.parse(match.group(0)!);
-          if (await canLaunchUrl(url)) {
-            await launchUrl(url, mode: LaunchMode.externalApplication);
-          }
-        } else {
-          // Show content in a dialog if no URL found
-          _showContentDialog(item);
-        }
-      } else {
-        // For files and images, show content in a dialog
-        _showContentDialog(item);
-      }
+      // Show content dialog for demo mode
+      _showContentDialog(item);
     } catch (e) {
       // Show content in a dialog as fallback
       _showContentDialog(item);
     }
   }
+
+  /*
+  Widget _buildKnowledgeGraphView(MyAIDataProvider provider, Map<String, Color> themeColors) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            themeColors['background']!,
+            themeColors['background']!.withOpacity(0.8),
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Knowledge Graph
+          KnowledgeGraphWidget(
+            showMiniMap: true,
+            onSelectionChanged: (selectedIds) {
+              setState(() {
+                _selectedDocuments = selectedIds;
+                if (selectedIds.isNotEmpty && !_showLLMPanel) {
+                  _showLLMPanel = true;
+                }
+              });
+            },
+          ),
+          
+          // View Controls
+          Positioned(
+            top: 16,
+            right: _showLLMPanel ? 420 : 16,
+            child: _buildViewControls(provider, themeColors),
+          ),
+          
+          // Status info
+          Positioned(
+            bottom: 16,
+            right: _showLLMPanel ? 420 : 16,
+            child: _buildGraphStatus(provider, themeColors),
+          ),
+        ],
+      ),
+    );
+  }
+  */
+  
+  /*
+  Widget _buildViewControls(MyAIDataProvider provider, Map<String, Color> themeColors) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: themeColors['surface']!.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: themeColors['primary']!.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Toggle between cosmic and graph view
+          IconButton(
+            icon: Icon(
+              _showKnowledgeGraph ? Icons.account_tree : Icons.bubble_chart,
+              color: themeColors['primary'],
+              size: 16,
+            ),
+            tooltip: _showKnowledgeGraph ? 'Switch to Cosmic View' : 'Switch to Graph View',
+            onPressed: () {
+              setState(() {
+                _showKnowledgeGraph = !_showKnowledgeGraph;
+              });
+            },
+          ),
+          
+          const SizedBox(width: 8),
+          
+          // Toggle LLM panel
+          IconButton(
+            icon: Icon(
+              Icons.psychology,
+              color: _showLLMPanel ? themeColors['primary'] : themeColors['textSecondary'],
+              size: 16,
+            ),
+            tooltip: _showLLMPanel ? 'Hide AI Panel' : 'Show AI Panel',
+            onPressed: () {
+              setState(() {
+                _showLLMPanel = !_showLLMPanel;
+              });
+            },
+          ),
+          
+          const SizedBox(width: 8),
+          
+          // Clear selection
+          if (_selectedDocuments.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                Icons.clear,
+                color: themeColors['textSecondary'],
+                size: 16,
+              ),
+              tooltip: 'Clear Selection',
+              onPressed: () {
+                setState(() {
+                  _selectedDocuments.clear();
+                });
+              },
+            ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildGraphStatus(MyAIDataProvider provider, Map<String, Color> themeColors) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: themeColors['surface']!.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: themeColors['primary']!.withOpacity(0.3)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.analytics,
+                color: themeColors['primary'],
+                size: 14,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Knowledge Graph',
+                style: TextStyle(
+                  color: themeColors['text'],
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${provider.dataItems.length} documents • ${_selectedDocuments.length} selected',
+            style: TextStyle(
+              color: themeColors['textSecondary'],
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  */
 
   void _showContentDialog(DataItem item) {
     showDialog(
