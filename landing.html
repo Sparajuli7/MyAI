@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyAI - Interactive Knowledge Graphs for Research</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(255, 119, 198, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+            max-width: 800px;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            opacity: 0.8;
+            line-height: 1.7;
+        }
+        
+        .cta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cta-card:hover::before {
+            left: 100%;
+        }
+        
+        .cta-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .cta-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .cta-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+        
+        .cta-desc {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .features {
+            padding: 5rem 0;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+        
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .circle-1 {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .circle-2 {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+        
+        .circle-3 {
+            width: 60px;
+            height: 60px;
+            top: 40%;
+            left: 80%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .tagline {
+                font-size: 1.2rem;
+            }
+            
+            .cta-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-circle circle-1"></div>
+        <div class="floating-circle circle-2"></div>
+        <div class="floating-circle circle-3"></div>
+    </div>
+    
+    <div class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="logo pulse">MyAI</h1>
+                <p class="tagline">Interactive Knowledge Graphs for Research</p>
+                <p class="description">
+                    Transform your document collections into queryable knowledge graphs. See all related data points instantly with one-click access to original sources. Built for researchers who need efficient data organization that helps you think more clearly, not tools that think for you.
+                </p>
+                
+                <div class="cta-grid">
+                    <!-- Live App - Currently working on localhost:3000 -->
+                    <div class="cta-card" onclick="window.open('http://localhost:3000', '_blank')">
+                        <span class="cta-icon">🔬</span>
+                        <h3 class="cta-title">Live Demo</h3>
+                        <p class="cta-desc">Query your organized data with instant access to source documents</p>
+                        <button class="btn">Try Demo</button>
+                    </div>
+                    
+                    <!-- Demo Video - Replace with your actual demo video URL -->
+                    <div class="cta-card" onclick="window.open('https://youtube.com/watch?v=YOUR_VIDEO_ID', '_blank')">
+                        <span class="cta-icon">📋</span>
+                        <h3 class="cta-title">Knowledge Graph Demo</h3>
+                        <p class="cta-desc">See how documents become queryable knowledge graphs with direct source linking</p>
+                        <button class="btn">Watch Demo</button>
+                    </div>
+                    
+                    <!-- Feedback Form - Replace with your Google Form URL -->
+                    <div class="cta-card" onclick="window.open('https://forms.google.com/YOUR_FORM_ID', '_blank')">
+                        <span class="cta-icon">🎓</span>
+                        <h3 class="cta-title">Research Collaboration</h3>
+                        <p class="cta-desc">Help us build better research productivity infrastructure for academics</p>
+                        <button class="btn">Join Discussion</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="features">
+        <div class="container">
+            <h2 class="section-title">Personal AI Infrastructure</h2>
+            <p class="section-subtitle">Research productivity through intelligent data organization</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🕸️</span>
+                    <h3 class="cta-title">Interactive Knowledge Graphs</h3>
+                    <p class="cta-desc">Transform document collections into queryable networks. See connections between concepts, papers, and data points instantly.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3 class="cta-title">Research Acceleration</h3>
+                    <p class="cta-desc">Find all relevant data points in seconds. Eliminate time spent searching and reorganizing—focus on analysis and insights.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <span class="feature-icon">🔗</span>
+                    <h3 class="cta-title">Source Traceability</h3>
+                    <p class="cta-desc">Every data point links directly to original documents. Maintain academic rigor with full source transparency.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add smooth scrolling and interaction effects
+        document.querySelectorAll('.cta-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.background = 'rgba(255, 255, 255, 0.15)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.background = 'rgba(255, 255, 255, 0.1)';
+            });
+        });
+        
+        // Add parallax effect to floating elements
+        document.addEventListener('mousemove', (e) => {
+            const circles = document.querySelectorAll('.floating-circle');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            circles.forEach((circle, index) => {
+                const speed = (index + 1) * 0.5;
+                const xMove = (x - 0.5) * speed * 20;
+                const yMove = (y - 0.5) * speed * 20;
+                circle.style.transform = `translate(${xMove}px, ${yMove}px)`;
+            });
+        });
+    </script>
+</body>
+</html>

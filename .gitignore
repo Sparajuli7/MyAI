@@ -1,0 +1,59 @@
+# Rust
+myai-mvp/target/
+**/*.rs.bk
+
+# Flutter/Dart
+myai_ux/build/
+myai_ux/.dart_tool/
+myai_ux/.flutter-plugins
+myai_ux/.flutter-plugins-dependencies
+myai_ux/.packages
+myai_ux/.pub-cache/
+myai_ux/.pub/
+myai_ux/build/
+myai_ux/ios/Flutter/flutter_export_environment.sh
+myai_ux/ios/Flutter/Generated.xcconfig
+myai_ux/ios/Flutter/flutter_export_environment.sh
+myai_ux/macos/Flutter/flutter_export_environment.sh
+myai_ux/macos/Flutter/Flutter-Generated.xcconfig
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment files
+.env
+.env.local
+
+# Data directories (you may want to keep some of these)
+data/
+*.db
+*.sqlite
+
+# Python cache (for test scripts)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node modules (if any)
+node_modules/
